@@ -3,6 +3,7 @@ import {Camera} from "expo-camera";
 import * as ImageManipulator from "expo-image-manipulator"
 import React, {useEffect, useRef, useState} from "react";
 
+
 const CameraScreen = () => {
     const [hasPermission, setHasPermission] = useState<null | boolean>(null);
     const [type, setType] = useState(Camera.Constants.Type.back);
