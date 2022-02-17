@@ -7,6 +7,8 @@ import {
     Button,
     View,
     TouchableOpacity,
+    Alert,
+    ListRenderItemInfo,
 } from "react-native";
 import singleFileUploader from "single-file-uploader";
 
@@ -22,6 +24,59 @@ export default function ImagesScreen() {
         })();
     }, []);
 
+    //TO COMPLETE
+    const showAlert = (text: String, callback: CallableFunction) =>
+        Alert.alert(
+            "Alert Title",
+            "My Alert Msg",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => Alert.alert("Cancel Pressed"),
+                    style: "cancel",
+                },
+            ],
+            {
+                cancelable: true,
+                onDismiss: () =>
+                    Alert.alert(
+                        "This alert was dismissed by tapping outside of the alert dialog."
+                    ),
+            }
+        );
+
+    const uploadPicture = async (itemData: ListRenderItemInfo<any>) => {
+        try {
+            await singleFileUploader({
+                distantUrl: "https://wildstagram.nausicaa.wilders.dev/upload",
+                filename: itemData.item,
+                filetype: "image/jpeg",
+                formDataName: "fileData",
+                localUri:
+                    FileSystem.cacheDirectory +
+                    "ImageManipulator/" +
+                    itemData.item,
+            });
+            alert("Picture uploaded 🚀");
+        } catch (err) {
+            alert("Error");
+            throw err;
+        }
+    };
+
+    const deletePicture = async (itemData: ListRenderItemInfo<any>) => {
+        try {
+            await FileSystem.deleteAsync(
+                FileSystem.cacheDirectory + "ImageManipulator/" + itemData.item
+            );
+            alert("picture deleted");
+            setImagesURI(imagesURI.filter((image) => image != itemData.item));
+        } catch (e) {
+            console.log("Something went wrong", e);
+            alert("we can't delete this picture");
+        }
+    };
+
     return imagesURI.length > 0 ? (
         <FlatList
             style={styles.imageContainer}
@@ -32,24 +87,7 @@ export default function ImagesScreen() {
                 return (
                     <View style={styles.imageContainer}>
                         <TouchableOpacity
-                            onLongPress={async () => {
-                                try {
-                                    await FileSystem.deleteAsync(
-                                        FileSystem.cacheDirectory +
-                                            "ImageManipulator/" +
-                                            itemData.item
-                                    );
-                                    alert("picture deleted");
-                                    setImagesURI(
-                                        imagesURI.filter(
-                                            (image) => image != itemData.item
-                                        )
-                                    );
-                                } catch (e) {
-                                    console.log("Something went wrong", e);
-                                    alert("we can't delete this picture");
-                                }
-                            }}
+                            onLongPress={() => deletePicture(itemData)}
                         >
                             <Image
                                 style={styles.image}
@@ -63,25 +101,7 @@ export default function ImagesScreen() {
                         </TouchableOpacity>
                         <Button
                             title="upload"
-                            onPress={async () => {
-                                try {
-                                    await singleFileUploader({
-                                        distantUrl:
-                                            "https://wildstagram.nausicaa.wilders.dev/upload",
-                                        filename: itemData.item,
-                                        filetype: "image/jpeg",
-                                        formDataName: "fileData",
-                                        localUri:
-                                            FileSystem.cacheDirectory +
-                                            "ImageManipulator/" +
-                                            itemData.item,
-                                    });
-                                    alert("Picture uploaded 🚀");
-                                } catch (err) {
-                                    alert("Error");
-                                    throw err;
-                                }
-                            }}
+                            onPress={() => uploadPicture(itemData)}
                         />
                     </View>
                 );
