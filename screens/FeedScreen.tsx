@@ -4,21 +4,26 @@ import { Image, FlatList, StyleSheet } from "react-native";
 
 export default function FeedScreen() {
     const [serverImagesUrls, setServerImagesUrls] = useState([]);
+    const [isFetching, setIsFetching] = useState(false);
+
     useEffect(() => {
         (async () => {
             const filesUrl = await axios.get(
                 "https://wildstagram.nausicaa.wilders.dev/list"
             );
-            console.log("filesurls", filesUrl.data);
+            console.log("it's fetching");
             setServerImagesUrls(filesUrl.data);
+            setIsFetching(false);
         })();
-    }, []);
+    }, [isFetching]);
+
     return serverImagesUrls.length > 0 ? (
         <FlatList
             data={serverImagesUrls}
             keyExtractor={(serverImageURI) => serverImageURI}
+            refreshing={isFetching}
+            onRefresh={() => setIsFetching(true)}
             renderItem={(itemData) => {
-                console.log("item", itemData);
                 return (
                     <>
                         <Image
